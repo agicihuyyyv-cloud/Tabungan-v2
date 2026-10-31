@@ -12,7 +12,6 @@ jobs:
         run: |
           rm -rf tabungan-app
           unzip -o tabungan-app.zip
-          ls -la tabungan-app
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -26,7 +25,7 @@ jobs:
           npm install
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npm run build
-          npx cap init Tabungan com.tabungan.app --web-dir=dist --npm-client npm
+          npx cap init Tabungan com.tabungan.app --web-dir=dist
           npx cap add android
           npx cap copy android
           cd android
