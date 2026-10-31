@@ -11,18 +11,20 @@ jobs:
       - name: Unzip
         run: |
           unzip -o tabungan-app.zip
-          ls -la
+          echo "=== LIHAT STRUKTUR ==="
+          ls -R | head -100
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Build APK
-        uses: gradle/gradle-build-action@v3
-        with:
-          gradle-version: 8.9
-          arguments: assembleDebug
-          build-root-directory: tabungan-app
+      - name: Build APK Auto
+        run: |
+          PROJECT=$(find . -name "settings.gradle" | head -1 | xargs dirname)
+          echo "Project found at: $PROJECT"
+          cd $PROJECT
+          chmod +x gradlew
+          ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: tabungan-APK
-          path: tabungan-app/app/build/outputs/apk/debug/*.apk
+          path: "**/app/build/outputs/apk/debug/*.apk"
