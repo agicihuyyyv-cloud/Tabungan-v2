@@ -10,16 +10,26 @@ jobs:
       - uses: actions/checkout@v4
       - name: Unzip
         run: |
-          unzip -o tabungan-app.zip
-          echo "=== LIHAT STRUKTUR ==="
-          ls -R | head -100
+          unzip -o tabungan-app.zip || unzip -o Tabungan-Android.zip || unzip -o "*.zip"
+          echo "=== HASIL UNZIP ==="
+          ls -la
+          echo "=== CARI FILE GRADLE ==="
+          find . -maxdepth 4 -name "settings.gradle*" -o -name "gradlew"
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
       - name: Build APK Auto
         run: |
-          PROJECT=$(find . -name "settings.gradle" | head -1 | xargs dirname)
+          PROJECT=$(find . -type f -name "settings.gradle*" | head -1 | xargs dirname 2>/dev/null)
+          if [ -z "$PROJECT" ]; then
+            PROJECT=$(find . -type f -name "gradlew" | head -1 | xargs dirname 2>/dev/null)
+          fi
+          if [ -z "$PROJECT" ]; then
+            echo "GAGAL NEMU PROJECT, isi folder:"
+            ls -R | head -200
+            exit 1
+          fi
           echo "Project found at: $PROJECT"
           cd $PROJECT
           chmod +x gradlew
