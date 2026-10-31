@@ -10,28 +10,29 @@ jobs:
       - uses: actions/checkout@v4
       - name: Unzip
         run: |
-          unzip -o tabungan-app.zip || unzip -o Tabungan-Android.zip || unzip -o "*.zip"
-          echo "=== HASIL UNZIP ==="
           ls -la
-          echo "=== CARI FILE GRADLE ==="
-          find . -maxdepth 4 -name "settings.gradle*" -o -name "gradlew"
+          echo "--- unzip ---"
+          unzip -o tabungan-app.zip || unzip -o "*.zip" || echo "ZIP TIDAK KETEMU!"
+          echo "--- hasil ---"
+          ls -la
+          find . -maxdepth 4 -type f | grep -E "gradle|settings" | head -30
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
       - name: Build APK Auto
         run: |
-          PROJECT=$(find . -type f -name "settings.gradle*" | head -1 | xargs dirname 2>/dev/null)
-          if [ -z "$PROJECT" ]; then
-            PROJECT=$(find . -type f -name "gradlew" | head -1 | xargs dirname 2>/dev/null)
-          fi
-          if [ -z "$PROJECT" ]; then
-            echo "GAGAL NEMU PROJECT, isi folder:"
-            ls -R | head -200
+          FILE=$(find . -name "settings.gradle*" -type f | head -1)
+          if [ -z "$FILE" ]; then FILE=$(find . -name "gradlew" -type f | head -1); fi
+          echo "File found: $FILE"
+          if [ -z "$FILE" ]; then
+            echo "GAGAL, gak ada settings.gradle / gradlew"
+            ls -R | head -100
             exit 1
           fi
-          echo "Project found at: $PROJECT"
-          cd $PROJECT
+          DIR=$(dirname "$FILE")
+          echo "Build dir: $DIR"
+          cd $DIR
           chmod +x gradlew
           ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
